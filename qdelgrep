@@ -1,0 +1,106 @@
+#!/usr/bin/perl
+#Zack Ramjan - USC Epigenome Center
+#PBS HACK, wrap pbs qstat to look like sge qstat. we emulate array jobs
+#by pulling the jobid and tasking from the job name in the form
+# name = zXXXX_YYY where XXX is the jobid and YYY is the task id
+use Time::Local;
+use Term::ANSIColor;
+use Time::HiRes qw(usleep nanosleep);
+use strict;
+
+my $PBS_QSTAT = "qstat -f";
+my $username = $ENV{USER};
+
+#FOR TESTING ONLY
+#$PBS_QSTAT = "ssh ramjan\@hpc-login2 qstat -f";
+#$username = "ramjan";
+
+my $pbsQstat = `$PBS_QSTAT`;
+my @pbsJobs = split("Job Id:", $pbsQstat);
+my $regex = $ARGV[0] || die "specify a pattern/regex";
+my @ids;
+
+for my $job (@pbsJobs)
+{
+
+        my %jobDetails;
+        my @jobLines = split("\n", $job);
+        chomp $jobLines[0];
+	if($jobLines[0] =~ /\s*\d+/)
+	{
+		$jobDetails{"Job Id"} = $jobLines[0];
+		for my $jobProp (@jobLines)
+		{
+			if($jobProp =~ /\s*(\w+)\s=\s(.+)$/)
+			{
+				$jobDetails{$1} = $2;
+				chomp $jobDetails{$1};
+			}
+		}
+
+
+		#clean up pbs output to conform to SGE
+		# to simulate arrays we mangle the job names and use it as an id and task
+		#JOB ID
+		$jobDetails{"Job Id"} =~ /^\s*(\d+)/;
+		$jobDetails{"Job Id"} = $1;
+		
+		my $jobid = my $taskid = "";
+		if($jobDetails{"Job_Name"} =~ /z(\d+)_(\d+)/)  
+		{
+			$jobDetails{"Job Id"} = $1;
+			$jobDetails{"Task_Id"} = $2;
+		}
+
+		#JOB STATE
+		$jobDetails{"job_state"} = lc($jobDetails{"job_state"});
+		$jobDetails{"job_state"} =~ s/q/qw/; 
+
+		#JOB START TIME
+		my %months =	("Jan"=>1, "Feb"=>2, "Mar"=>3, "Apr"=>4, "May"=>5, "Jun"=>6, 
+				"Jul"=>7, "Aug"=>8, "Sep"=>9, "Oct"=>10, "Nov"=>11, "Dec"=>12);
+		my @time = split(/\s+/,  $jobDetails{"ctime"}); 
+		$jobDetails{"ctime"} = "$months{$time[1]}/$time[2]/$time[4] $time[3]";
+
+		#JOB OWNER
+		$jobDetails{"Job_Owner"} =~ s/\@.+$//; 
+
+		#JOB ARRAY
+		$jobDetails{"fullText"} .= $jobDetails{$_} . " " for (keys %jobDetails);
+	
+
+		#PRINT RESULTS
+		 if ($jobDetails{"Job_Owner"} eq $username && $jobDetails{"fullText"} =~ /$regex/ )
+		{
+			print "\t" . $jobDetails{"Job Id"} . "\t" . $jobDetails{"Priority"} . "\t";
+			push @ids, $jobDetails{"Job Id"};
+			if( $jobDetails{"job_state"} =~ /qw/i) {print color("blue");}
+			if( $jobDetails{"job_state"} =~ /r/i) {print color("green");}
+			if( $jobDetails{"job_state"} =~ /h/i) {print color("red");}
+			if( $jobDetails{"job_state"} =~ /e/i) {print color("yellow on_black");}
+			print   sprintf("%-*s", 35, $jobDetails{"Job_Name"}) ;
+			print color("reset");
+			print "\t" .  sprintf("%-*s", 10, $jobDetails{"Job_Owner"}) . "\t" . $jobDetails{"job_state"} . "\t" . $jobDetails{"ctime"} . "\t"  ;
+			print  color("underscore black");
+			print  $jobDetails{"queue"} ;
+			print color("reset");
+			print ":" . $jobDetails{"server"} . "\t" . $jobDetails{"Task_Id"} . "\n";
+
+		}
+	}
+}
+exit if scalar(@ids) < 1;
+print "kill the " . scalar(@ids) . " above jobs!!!!????   (y/n)\n";
+my $confirm = <STDIN>;
+if($confirm =~ /^y/)
+{
+	print "qdel'ing " . scalar(@ids) . "jobs...\n";
+	for my $id (@ids)
+	{
+		system("qdel $id");
+		usleep 333000;
+		#print("qdel $id\n");
+	}
+}
+
+

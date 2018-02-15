@@ -1,0 +1,8 @@
+#!/usr/bin/perl
+$start = $ARGV[0];
+$end = $ARGV[1];
+
+for($i=$start; $i<=$end; $i++)
+{
+        system("qdel $i");
+}
