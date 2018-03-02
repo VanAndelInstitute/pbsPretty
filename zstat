@@ -7,7 +7,7 @@ use Time::Local;
 use Term::ANSIColor;
 use strict;
 
-my $PBS_QSTAT = "qstat -f";
+my $PBS_QSTAT = "/cm/shared/apps/torque/current/bin/qstat -f";
 my $username = $ARGV[0] || $ENV{USER};
 
 #FOR TESTING ONLY

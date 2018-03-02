@@ -1,7 +1,7 @@
-node001	gpu-k80
-node002	gpu-k80
-node003	gpu-k80-x2
-node004	gpu-k80-x2
+node001	gpu (k80)
+node002	gpu (k80)
+node003	gpu (k80x2)
+node004	gpu (k80x2)
 node005	shortq    
 node006	shortq    
 node007	shortq    
@@ -70,14 +70,14 @@ node069	triche-only
 node070	triche-only
 node071	triche-only
 node072	triche-only
-node073	gpu-1080ti
-node074	gpu-1080ti
-node075	gpu-1080ti
-node076	gpu-1080ti
-node077	gpu-1080ti
-node078	gpu-1080ti
-node079	gpu-1080ti
-node080	gpu-1080ti
+node073	gpu (1080ti)
+node074	gpu (1080ti)
+node075	gpu (1080ti)
+node076	gpu (1080ti)
+node077	gpu (1080ti)
+node078	gpu (1080ti)
+node079	gpu (1080ti)
+node080	gpu (1080ti)
 node201	BBC-only
 node202	BBC-only
 node203	BBC-only
