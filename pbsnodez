@@ -4,7 +4,7 @@ use Term::ANSIColor;
 use Data::Dumper;
 
 
-$output = `pbsnodes`;
+$output = `/cm/shared/apps/torque/6.0.2/bin/pbsnodes`;
 $zstatout = `/primary/vari/software/pbsPretty/zstatLegacy all`;
 open HAND, '<', "/primary/vari/software/pbsPretty/nodes.txt";
 %nodeClass = map {chomp; split /\t+/} (<HAND>);

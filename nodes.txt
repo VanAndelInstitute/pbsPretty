@@ -61,7 +61,7 @@ node060	longq
 node061	HLi-only
 node062	HLi-only
 node063	HLi-only
-node064	HLi-only
+node064	Jones-only
 node065	BBC-only
 node066	BBC-only
 node067	BBC-only
@@ -78,6 +78,10 @@ node077	gpu (1080ti)
 node078	gpu (1080ti)
 node079	gpu (1080ti)
 node080	gpu (1080ti)
+node081	HLi-only
+node082	HLi-only
+node083	Genomics-only
+node084	Genomics-only
 node201	BBC-only
 node202	BBC-only
 node203	BBC-only

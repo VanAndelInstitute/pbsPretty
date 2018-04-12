@@ -1,0 +1,14 @@
+#!/usr/bin/perl
+use File::Temp qw/ tempfile tempdir /;
+
+my $cmd = join ' ', @ARGV ;
+
+my $name = $cmd;
+
+$name =~ s/\W/_/g;
+$name = substr($name, 0,60);
+
+($fh, $filename) = tempfile();
+
+print $fh "$cmd\n";
+system("qsub -N $name -k n -l walltime=7:59:00 -l nodes=1:ppn=28 -d . $filename");
