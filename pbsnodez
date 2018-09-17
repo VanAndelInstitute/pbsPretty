@@ -37,9 +37,6 @@ foreach  $n (@nodes)
 
 }
 
-
-
-
 foreach $k (sort keys %nodeprops)
 {
 	my %nodejobs;
@@ -50,6 +47,7 @@ foreach $k (sort keys %nodeprops)
 	
 	#print Dumper(%detailedProps);
 	$color = $nodeprops{$k}{jobs} =~ /s+/ ? "red" : "green";
+    $color = "red" if $color eq "green" && $detailedProps{loadave} > 0.2;
 	print color($color) . "$k   " . $nodeClass{$k} . "\t" . color("reset");
 	print "$nodeprops{$k}{np}core\t";
 	$nodeprops{$k}{jobs} =~ s/\-\d+.master.cm.cluster//g;
@@ -66,15 +64,19 @@ foreach $k (sort keys %nodeprops)
 	}
 	$nodeprops{$k}{jobs} =~ s/[\d-]+\///g;
 	$nodejobs{$_} ++  for split ",",$nodeprops{$k}{jobs};
-	print "[" . color("cyan") . "$_" . color("reset") . ":core#($nodejobsCores{$_}):" . color("yellow") . "$zstat{$_}[2]" . color("reset") . "]"  for  (keys %nodejobs);
+	
+    $count = 0;
+    for (keys %nodejobs) {
+      print "[" . color("cyan") . "$_" . color("reset") . ":core#($nodejobsCores{$_}):" . color("yellow") . "$zstat{$_}[2]" . color("reset") . "]";
+      print("\n\t\t\t\t") if (($count % 3 == 0) && ($count > 0));
+      $count += 1;
+    }
 	print color("green") . "FREE" .  color("reset") if !%nodejobs && $nodeprops{$k}{state} =~ /free/ && $detailedProps{loadave} <= 0.2;
 	print color("bright_red") . "FREE (has active processes)" .  color("reset") if !%nodejobs && $nodeprops{$k}{state} =~ /free/ && $detailedProps{loadave} > 0.2;
 	print color("red") . "NODE IS OFFLINE" .  color("reset") if !%nodejobs && $nodeprops{$k}{state} !~ /free/;
-	print color("magenta") . "\tload=$detailedProps{loadave} Node is idle!" . color("reset") if %nodejobs && $detailedProps{loadave} < 0.02;  
-	print color("reset") . "\tload=$detailedProps{loadave}" . color("reset") if  $detailedProps{loadave} >= 0.2;  
+    print color("magenta") . "\tload=$detailedProps{loadave} Node is idle!" . color("reset") if %nodejobs && $detailedProps{loadave} < 0.02;  
+    print color("reset") . "\tload=$detailedProps{loadave}" . color("reset") if  $detailedProps{loadave} >= 0.2;  
 	#print "$_  = $detailedProps{$_}\n" for sort keys %detailedProps; 
 	print "\n";
-
-
 
 }
