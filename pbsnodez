@@ -68,7 +68,7 @@ foreach $k (sort keys %nodeprops)
     $count = 0;
     for (keys %nodejobs) {
       print "[" . color("cyan") . "$_" . color("reset") . ":core#($nodejobsCores{$_}):" . color("yellow") . "$zstat{$_}[2]" . color("reset") . "]";
-      print("\n\t\t\t\t") if (($count % 3 == 0) && ($count > 0));
+      print("\n\t\t\t\t\t") if (($count % 3 == 0) && ($count > 0));
       $count += 1;
     }
 	print color("green") . "FREE" .  color("reset") if !%nodejobs && $nodeprops{$k}{state} =~ /free/ && $detailedProps{loadave} <= 0.2;
@@ -80,3 +80,5 @@ foreach $k (sort keys %nodeprops)
 	print "\n";
 
 }
+
+system "echo " . time . " " . $ENV{USER} ." >> /primary/vari/software/pbsPretty/log/access.log";
